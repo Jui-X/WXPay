@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/mandarinbites_pay?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8
+    username:
+    password:
+
+server:
+  port: 8080
+  tomcat:
+    uri-encoding: UTF-8
+
+wx:
+  pay:
+    appId: wx081257819063ae2e #微信公众号或者小程序等的appid
+    mchId: 1562962681 #微信支付商户号
+    mchKey: oUcUVJS9vdIulJhNccgGKFv7WzlhMu2b0G12kHGmdn7 #微信支付商户密钥
+    keyPath: # p12证书的位置，可以指定绝对路径，也可以指定类路径（以classpath:开头）
+    notifyUrl: pay.hskzhhy.cn/weixin/pay/notify # 微信异步通知回调URL
+    refundUrl: #
+    tradeType: JSAPI # 交易模式
