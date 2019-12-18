@@ -6,13 +6,15 @@ spring:
     password:
 
 server:
-  port: 8080
+  port: 80
   tomcat:
     uri-encoding: UTF-8
 
 wx:
   pay:
-    appId: wx081257819063ae2e #微信公众号或者小程序等的appid
+    appId: wx081257819063ae2e #微信公众号或者小程序等的APP ID
+    appSecret: 25ef5c9588dfccc1d30d79c350ba4369 # APP Secret
+    apiKey: 49D39C8427C9579BA03B591A1DF6E594 # API Key
     mchId: 1562962681 #微信支付商户号
     mchKey: oUcUVJS9vdIulJhNccgGKFv7WzlhMu2b0G12kHGmdn7 #微信支付商户密钥
     keyPath: # p12证书的位置，可以指定绝对路径，也可以指定类路径（以classpath:开头）

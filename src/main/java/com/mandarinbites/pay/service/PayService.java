@@ -1,16 +1,20 @@
 package com.mandarinbites.pay.service;
 
+import com.mandarinbites.pay.domain.AccessToken;
 import com.mandarinbites.pay.domain.PayInfo;
-import com.mandarinbites.pay.exception.PayException;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
 public interface PayService {
 
-    PayInfo prePayUnifiedOrder(String phoneNumber, String email, String referees) throws PayException, Exception;
+    AccessToken getAccessTokenByCode(String code);
 
-    Map<String, String> wxPayByJSAPI(String traceId, String clientIP, String openId, BigDecimal fee) throws PayException, Exception;
+    String validatePayResult(String xml) throws Exception;
+
+    PayInfo prePayUnifiedOrder(String openId, String phoneNumber, String email, String referees) throws Exception;
+
+    Map<String, String> wxPayByJSAPI(String traceId, String clientIP, String openId, BigDecimal fee) throws Exception;
 
     Map<String, String> checkPayStatus(String prePayId) throws Exception;
 }

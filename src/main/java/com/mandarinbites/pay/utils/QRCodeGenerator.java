@@ -17,7 +17,7 @@ import java.util.HashMap;
  * @param: none
  * @description:
  * @author: KingJ
- * @create: 2019-12-15 23:43
+ * @create: 2019-12-14 23:43
  **/
 public class QRCodeGenerator {
 

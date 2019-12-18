@@ -9,7 +9,7 @@ import static com.mandarinbites.pay.enums.PayExceptionEnums.ANOTHER_EXCEPTION;
  * @param: none
  * @description:
  * @author: JuiX
- * @create: 2019-12-15 22:24
+ * @create: 2019-12-14 22:24
  **/
 @Getter
 public class PayException extends RuntimeException {

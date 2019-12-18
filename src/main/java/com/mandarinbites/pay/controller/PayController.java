@@ -5,14 +5,14 @@ import com.mandarinbites.pay.domain.PayInfo;
 import com.mandarinbites.pay.exception.PayException;
 import com.mandarinbites.pay.service.PayService;
 import com.mandarinbites.pay.utils.JsonResult;
+import com.mandarinbites.pay.utils.QRCodeGenerator;
+import com.mandarinbites.pay.utils.Stream2StringUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -27,8 +27,21 @@ import java.util.Map;
 @Log4j2
 public class PayController {
 
+    private static final String URL = "pay.hskzhhy.cn/weixin/pay/index.html";
+
     @Autowired
     private PayService payService;
+
+    @GetMapping
+    public JsonResult getAccessTokenByCode(String code) {
+        try {
+            payService.getAccessTokenByCode(code);
+
+            return JsonResult.ok();
+        } catch (Exception ex) {
+            return JsonResult.errorException(ex.getMessage());
+        }
+    }
 
     @PostMapping("/payByJSAPI")
     public JsonResult payByJSAPI(@RequestBody(required = true) JSONObject payParam, HttpServletRequest request) {
@@ -40,7 +53,7 @@ public class PayController {
             String openId = payParam.getString("openId");
             BigDecimal fee = payParam.getBigDecimal("fee");
 
-            PayInfo payInfo = payService.prePayUnifiedOrder(phoneNumber, email, referees);
+            PayInfo payInfo = payService.prePayUnifiedOrder(openId, phoneNumber, email, referees);
 
             Map<String, String> prePayResult = payService.wxPayByJSAPI(payInfo.getTradeId(), clientIP, openId, fee);
 
@@ -54,14 +67,39 @@ public class PayController {
         }
     }
 
-    @PostMapping("/checkPayStatus")
-    public JsonResult confirmPayStatus() {
+    @PostMapping("/notify")
+    public JsonResult WXNotify(HttpServletRequest request) {
         try {
+            String xml = Stream2StringUtil.parseStream2XML(request);
 
+            String payResult = payService.validatePayResult(xml);
+
+            return JsonResult.ok(payResult);
+        } catch (PayException e) {
+            return JsonResult.errorMsg(e.getMessage());
+        } catch (Exception ex) {
+            return JsonResult.errorException(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/checkPayStatus")
+    public JsonResult confirmPayStatus(@RequestBody(required = true) JSONObject payStatus) {
+        try {
+            String prePayId = payStatus.getString("prePayId");
+
+            Map<String, String> queryResult = payService.checkPayStatus(prePayId);
+
+            return JsonResult.ok(queryResult);
         } catch (Exception e) {
 
+            return JsonResult.errorMsg(e.getMessage());
         }
+    }
 
-        return JsonResult.ok();
+    @RequestMapping("/getQRCode")
+    public void getQRCode(HttpServletResponse response) {
+        QRCodeGenerator qrCodeGenerator = new QRCodeGenerator();
+
+        qrCodeGenerator.QRCodeGenerate(response, URL);
     }
 }

@@ -6,7 +6,7 @@ import lombok.Data;
  * @param: none
  * @description:
  * @author: KingJ
- * @create: 2019-12-15 22:57
+ * @create: 2019-12-14 22:57
  **/
 @Data
 public class PayInfo {
