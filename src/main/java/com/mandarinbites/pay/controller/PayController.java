@@ -53,4 +53,15 @@ public class PayController {
             return JsonResult.errorMsg(ex.getMessage());
         }
     }
+
+    @PostMapping("/checkPayStatus")
+    public JsonResult confirmPayStatus() {
+        try {
+
+        } catch (Exception e) {
+
+        }
+
+        return JsonResult.ok();
+    }
 }

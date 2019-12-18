@@ -42,16 +42,27 @@ public class WXPayClient {
         data.put("trade_type", properties.getTradeType());
         data.put("openid", openId);
 
+        data = wxPay.fillRequestData(data);
+
         Map<String, String> response = wxPay.unifiedOrder(data);
 
         String prePayId = response.get("prepay_id");
         if (prePayId == null) {
             throw new PayException(PAY_FAIL.getCode(), PAY_FAIL.getMsg());
         }
-        data.put("package", "prepay_id=" + prePayId);
 
-        data = wxPay.fillRequestData(data);
+        return response;
+    }
 
-        return data;
+    public Map<String, String> orderQuery(WXPayConstants.SignType signType, boolean sandBox, String tradeId) throws Exception {
+        WXPayConfiguration configuration = new WXPayConfiguration();
+        WXPay wxPay = new WXPay(configuration, signType, sandBox);
+
+        Map<String, String> data = new HashMap<>();
+        data.put("out_trade_no", tradeId);
+
+        Map<String, String> queryResponse = wxPay.orderQuery(data);
+
+        return queryResponse;
     }
 }

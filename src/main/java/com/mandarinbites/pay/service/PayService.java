@@ -11,4 +11,6 @@ public interface PayService {
     PayInfo prePayUnifiedOrder(String phoneNumber, String email, String referees) throws PayException, Exception;
 
     Map<String, String> wxPayByJSAPI(String traceId, String clientIP, String openId, BigDecimal fee) throws PayException, Exception;
+
+    Map<String, String> checkPayStatus(String prePayId) throws Exception;
 }

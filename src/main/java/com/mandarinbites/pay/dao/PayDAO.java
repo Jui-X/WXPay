@@ -18,4 +18,7 @@ public interface PayDAO {
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int prePayUnifiedOrder(@Param("trade_id") String tradeId, @Param("phone_number") String phoneNumber, @Param("email") String email, @Param("referees") String referees,
                           @Param("pay_status") int status);
+
+    @Update("UPDATE pay_info SET prepay_id = #{prepay_id}")
+    void updatePrePayID(@Param("prepay_id") String prePayId);
 }

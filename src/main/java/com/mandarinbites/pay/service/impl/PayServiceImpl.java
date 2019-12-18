@@ -56,6 +56,22 @@ public class PayServiceImpl implements PayService {
     @Override
     public Map<String, String> wxPayByJSAPI(String traceId, String clientIP, String openId, BigDecimal fee) throws PayException, Exception {
 
-        return wxPayClient.payByJSAPI(WXPayConstants.SignType.MD5, true, traceId, clientIP, openId, fee);
+        Map<String, String> responseMap = wxPayClient.payByJSAPI(WXPayConstants.SignType.MD5, true, traceId, clientIP, openId, fee);
+
+        payDAO.updatePrePayID(responseMap.get("prepay_id"));
+
+        return responseMap;
+    }
+
+    @Override
+    public Map<String, String> checkPayStatus(String prePayId) throws Exception {
+
+        // TODO 根据前端传过来的prePayId查询对应的traceId
+
+        String tradeId = null;
+
+        Map<String, String> queryResponse = wxPayClient.orderQuery(WXPayConstants.SignType.MD5, true, tradeId);
+
+        return queryResponse;
     }
 }
