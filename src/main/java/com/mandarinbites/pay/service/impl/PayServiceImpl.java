@@ -31,6 +31,8 @@ import static com.mandarinbites.pay.enums.PayExceptionEnums.*;
 @Service
 public class PayServiceImpl implements PayService {
 
+    private static final String SUCCESS = "SUCCESS";
+
     @Autowired
     private PayDAO payDAO;
 
@@ -65,7 +67,7 @@ public class PayServiceImpl implements PayService {
         }
         PayInfo payInfo = payDAO.queryByTradeID(out_trade_no);
         if (payInfo != null) {
-            payDAO.updatePayStatus(PayStatusEnums.SUCCESS.getStatus());
+            payDAO.updatePayStatus(PayStatusEnums.SUCCESS.getStatus(), out_trade_no);
         }
         map = new HashMap<>();
         map.put("return_code", "SUCCESS");
@@ -75,13 +77,13 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public PayInfo prePayUnifiedOrder(String openId, String phoneNumber, String email, String referees) throws Exception {
+    public PayInfo prePayUnifiedOrder(String openId) throws Exception {
         UUID uuid = UUID.randomUUID();
         StringBuilder sb = new StringBuilder();
         sb.append(uuid.toString().replace("-", ""));
         String tradeId = MD5Util.getMD5Str(sb.toString());
         int payStatus = PayStatusEnums.NOT_PAID.getStatus();
-        int id = payDAO.prePayUnifiedOrder(tradeId, openId, phoneNumber, email, referees, payStatus);
+        int id = payDAO.prePayUnifiedOrder(tradeId, openId, payStatus);
         if (id <= 0) {
             throw new PayException(PayExceptionEnums.PRE_PAY_FAIL.getCode(), PayExceptionEnums.PRE_PAY_FAIL.getMsg());
         }
@@ -96,20 +98,26 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public Map<String, String> wxPayByJSAPI(String traceId, String clientIP, String openId, BigDecimal fee) throws Exception {
+    public Map<String, String> wxPayByJSAPI(String tradeId, String clientIP, String openId, BigDecimal fee) throws Exception {
 
-        Map<String, String> responseMap = wxPayClient.payByJSAPI(WXPayConstants.SignType.MD5, true, traceId, clientIP, openId, fee);
+        Map<String, String> responseMap = wxPayClient.payByJSAPI(WXPayConstants.SignType.MD5, true, tradeId, clientIP, openId, fee);
 
-        payDAO.updatePrePayID(responseMap.get("prepay_id"));
+        payDAO.updatePrePayID(responseMap.get("prepay_id"), openId);
 
         return responseMap;
     }
 
     @Override
-    public Map<String, String> checkPayStatus(String prePayId) throws Exception {
-        String tradeId = payDAO.queryPrePayId(prePayId);
+    public Map<String, String> checkPayStatus(String phoneNumber, String email, String referees, String prePayId) throws Exception {
+        String tradeId = payDAO.queryByPrePayId(prePayId);
 
         Map<String, String> queryResponse = wxPayClient.orderQuery(WXPayConstants.SignType.MD5, true, tradeId);
+
+        if (SUCCESS.equals(queryResponse.get("return_code")) && SUCCESS.equals(queryResponse.get("result_code")) && SUCCESS.equals(queryResponse.get("trade_state"))) {
+            payDAO.updatePayInfo(phoneNumber, email, referees, PayStatusEnums.SUCCESS.getStatus(), tradeId);
+        } else {
+            throw new PayException(Integer.parseInt(queryResponse.get("err_code")), queryResponse.get("err_code_des"));
+        }
 
         return queryResponse;
     }

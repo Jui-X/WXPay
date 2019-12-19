@@ -2,6 +2,8 @@ package com.mandarinbites.pay.utils;
 
 import lombok.Data;
 
+import java.util.*;
+
 /**
  * @param: none
  * @description: 自定义响应数据结构
@@ -45,6 +47,10 @@ public class JsonResult {
 
     public static JsonResult errorMsg(String msg) {
         return new JsonResult(500, msg, null);
+    }
+
+    public static JsonResult errorMsg(String msg, Map<String, String> response) {
+        return new JsonResult(500, msg, response);
     }
 
     public static JsonResult errorMap(Object data) {

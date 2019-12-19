@@ -12,9 +12,9 @@ public interface PayService {
 
     String validatePayResult(String xml) throws Exception;
 
-    PayInfo prePayUnifiedOrder(String openId, String phoneNumber, String email, String referees) throws Exception;
+    PayInfo prePayUnifiedOrder(String openId) throws Exception;
 
-    Map<String, String> wxPayByJSAPI(String traceId, String clientIP, String openId, BigDecimal fee) throws Exception;
+    Map<String, String> wxPayByJSAPI(String tradeId, String clientIP, String openId, BigDecimal fee) throws Exception;
 
-    Map<String, String> checkPayStatus(String prePayId) throws Exception;
+    Map<String, String> checkPayStatus(String phoneNumber, String email, String referees, String prePayId) throws Exception;
 }

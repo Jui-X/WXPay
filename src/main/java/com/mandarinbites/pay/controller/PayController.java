@@ -1,6 +1,7 @@
 package com.mandarinbites.pay.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.mandarinbites.pay.domain.AccessToken;
 import com.mandarinbites.pay.domain.PayInfo;
 import com.mandarinbites.pay.exception.PayException;
 import com.mandarinbites.pay.service.PayService;
@@ -35,25 +36,22 @@ public class PayController {
     @GetMapping
     public JsonResult getAccessTokenByCode(String code) {
         try {
-            payService.getAccessTokenByCode(code);
+            AccessToken accessToken = payService.getAccessTokenByCode(code);
 
-            return JsonResult.ok();
+            return JsonResult.ok(accessToken);
         } catch (Exception ex) {
             return JsonResult.errorException(ex.getMessage());
         }
     }
 
     @PostMapping("/payByJSAPI")
-    public JsonResult payByJSAPI(@RequestBody(required = true) JSONObject payParam, HttpServletRequest request) {
+    public JsonResult payByJSAPI(@RequestBody(required = true) JSONObject prePayParam, HttpServletRequest request) {
         try {
-            String phoneNumber = payParam.getString("phoneNumber");
-            String email = payParam.getString("email");
-            String referees = payParam.getString("referees");
             String clientIP = request.getRemoteAddr();
-            String openId = payParam.getString("openId");
-            BigDecimal fee = payParam.getBigDecimal("fee");
+            String openId = prePayParam.getString("openId");
+            BigDecimal fee = prePayParam.getBigDecimal("fee");
 
-            PayInfo payInfo = payService.prePayUnifiedOrder(openId, phoneNumber, email, referees);
+            PayInfo payInfo = payService.prePayUnifiedOrder(openId);
 
             Map<String, String> prePayResult = payService.wxPayByJSAPI(payInfo.getTradeId(), clientIP, openId, fee);
 
@@ -83,11 +81,16 @@ public class PayController {
     }
 
     @PostMapping("/checkPayStatus")
-    public JsonResult confirmPayStatus(@RequestBody(required = true) JSONObject payStatus) {
+    public JsonResult checkPayStatus(@RequestBody(required = true) JSONObject payParam) {
         try {
-            String prePayId = payStatus.getString("prePayId");
+            String phoneNumber = payParam.getString("phoneNumber");
+            String email = payParam.getString("email");
+            String referees = payParam.getString("referees");
+            String prePayId = payParam.getString("prePayId");
 
-            Map<String, String> queryResult = payService.checkPayStatus(prePayId);
+            // TODO 重复支付
+
+            Map<String, String> queryResult = payService.checkPayStatus(phoneNumber, email, referees, prePayId);
 
             return JsonResult.ok(queryResult);
         } catch (Exception e) {
