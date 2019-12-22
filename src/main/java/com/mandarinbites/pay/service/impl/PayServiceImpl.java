@@ -15,7 +15,6 @@ import com.mandarinbites.pay.utils.MD5Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -44,10 +43,13 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public AccessToken getAccessTokenByCode(String code) {
+
+        System.out.println("get OpenId start.");
         AccessToken accessToken = AccessTokenUtil.getAccessToken(code);
+        System.out.println("get OpenId over.");
 
         String openId = accessToken.getOpenid();
-        if (openId == null) {
+        if (openId == null || "".equals(openId)) {
             throw new PayException(GET_ACCESS_TOKEN_FAIL.getCode(), GET_ACCESS_TOKEN_FAIL.getMsg());
         }
 
@@ -62,7 +64,7 @@ public class PayServiceImpl implements PayService {
 
         Map<String, String> map = WXPayUtil.xmlToMap(xml);
         String out_trade_no = map.get("out_trade_no");
-        if (out_trade_no == null) {
+        if (out_trade_no == null || "".equals(out_trade_no)) {
             throw new PayException(PAY_RESULT_FAIL.getCode(), PAY_RESULT_FAIL.getMsg());
         }
         PayInfo payInfo = payDAO.queryByTradeID(out_trade_no);
@@ -78,6 +80,8 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public PayInfo prePayUnifiedOrder(String openId) throws Exception {
+        System.out.println("openId: " + openId);
+
         UUID uuid = UUID.randomUUID();
         StringBuilder sb = new StringBuilder();
         sb.append(uuid.toString().replace("-", ""));
@@ -94,11 +98,12 @@ public class PayServiceImpl implements PayService {
             throw new PayException(PRE_PAY_STATUS_ERROR.getCode(), PRE_PAY_STATUS_ERROR.getMsg());
         }
 
+        System.out.println("prePayInfo: " + prepayInfo.toString());
         return prepayInfo;
     }
 
     @Override
-    public Map<String, String> wxPayByJSAPI(String tradeId, String clientIP, String openId, BigDecimal fee) throws Exception {
+    public Map<String, String> wxPayByJSAPI(String tradeId, String clientIP, String openId, String fee) throws Exception {
 
         Map<String, String> responseMap = wxPayClient.payByJSAPI(WXPayConstants.SignType.MD5, true, tradeId, clientIP, openId, fee);
 

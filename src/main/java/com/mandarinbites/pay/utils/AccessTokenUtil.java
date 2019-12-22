@@ -29,9 +29,17 @@ public class AccessTokenUtil {
     }
 
     public static AccessToken getAccessToken(String code) {
+        System.out.println("code: " + code);
+
+        System.out.println("appId: " + properties.getAppId());
+        System.out.println("appSecret: " + properties.getAppSecret());
+
         String response = restTemplate.getForObject(url, String.class, properties.getAppId(), properties.getAppSecret(), code);
+        System.out.println("response: " + response);
+
         AccessToken accessToken = JSONObject.parseObject(response, AccessToken.class);
 
+        System.out.println("access token: " + accessToken.toString());
         return accessToken;
     }
 }

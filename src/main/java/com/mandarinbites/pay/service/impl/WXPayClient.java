@@ -10,7 +10,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ public class WXPayClient {
     @Autowired
     private WXPayProperties properties;
 
-    public Map<String, String> payByJSAPI(WXPayConstants.SignType signType, boolean sandBox, String tradeId, String clientIP, String openId, BigDecimal fee) throws Exception, PayException {
+    public Map<String, String> payByJSAPI(WXPayConstants.SignType signType, boolean sandBox, String tradeId, String clientIP, String openId, String fee) throws Exception, PayException {
         WXPayConfiguration configuration = new WXPayConfiguration();
         WXPay wxPay = new WXPay(configuration, signType, sandBox);
 
@@ -47,7 +46,7 @@ public class WXPayClient {
         Map<String, String> response = wxPay.unifiedOrder(data);
 
         String prePayId = response.get("prepay_id");
-        if (prePayId == null) {
+        if (prePayId == null || "".equals(prePayId)) {
             throw new PayException(PAY_FAIL.getCode(), PAY_FAIL.getMsg());
         }
 
