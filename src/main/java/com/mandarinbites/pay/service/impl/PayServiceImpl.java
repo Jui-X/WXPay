@@ -43,10 +43,10 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public AccessToken getAccessTokenByCode(String code) {
+        String appId = properties.getAppId();
+        String appSecret = properties.getAppSecret();
 
-        System.out.println("get OpenId start.");
-        AccessToken accessToken = AccessTokenUtil.getAccessToken(code);
-        System.out.println("get OpenId over.");
+        AccessToken accessToken = AccessTokenUtil.getAccessToken(code, appId, appSecret);
 
         String openId = accessToken.getOpenid();
         if (openId == null || "".equals(openId)) {
@@ -80,8 +80,6 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public PayInfo prePayUnifiedOrder(String openId) throws Exception {
-        System.out.println("openId: " + openId);
-
         UUID uuid = UUID.randomUUID();
         StringBuilder sb = new StringBuilder();
         sb.append(uuid.toString().replace("-", ""));

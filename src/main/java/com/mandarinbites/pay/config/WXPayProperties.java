@@ -2,7 +2,6 @@ package com.mandarinbites.pay.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
  **/
 @Data
 @Component
-@PropertySource("classpath:application.yml")
 @ConfigurationProperties(prefix = "wxpay")
 public class WXPayProperties {
 

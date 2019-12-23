@@ -21,25 +21,19 @@ public class AccessTokenUtil {
     private static RestTemplate restTemplate;
 
     @Autowired
-    private static WXPayProperties properties;
+    private WXPayProperties properties;
 
     static {
         restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().set(1, new StringHttpMessageConverter(StandardCharsets.UTF_8));
     }
 
-    public static AccessToken getAccessToken(String code) {
-        System.out.println("code: " + code);
+    public static AccessToken getAccessToken(String code, String appId, String appSecret) {
 
-        System.out.println("appId: " + properties.getAppId());
-        System.out.println("appSecret: " + properties.getAppSecret());
-
-        String response = restTemplate.getForObject(url, String.class, properties.getAppId(), properties.getAppSecret(), code);
-        System.out.println("response: " + response);
+        String response = restTemplate.getForObject(url, String.class, appId, appSecret, code);
 
         AccessToken accessToken = JSONObject.parseObject(response, AccessToken.class);
 
-        System.out.println("access token: " + accessToken.toString());
         return accessToken;
     }
 }

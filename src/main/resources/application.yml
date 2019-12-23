@@ -5,10 +5,6 @@ spring:
     username: root
     password: hsk#zhhy520
 
-  resources:
-    static-locations:
-      classpath:/static/
-
 server:
   port: 80
   tomcat:

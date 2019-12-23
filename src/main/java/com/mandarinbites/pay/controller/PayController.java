@@ -38,6 +38,13 @@ public class PayController {
         return "/index.html";
     }
 
+    @RequestMapping("/test")
+    public JsonResult test() {
+        AccessToken accessToken = payService.getAccessTokenByCode("");
+
+        return JsonResult.ok();
+    }
+
     @GetMapping("/token")
     @ResponseBody
     public JsonResult getAccessTokenByCode(String code) {
