@@ -16,6 +16,9 @@ public class PayInfo {
     /** 商户订单ID */
     private String tradeId;
 
+    /** open ID */
+    private String openId;
+
     /** 手机号 */
     private String phoneNumber;
 

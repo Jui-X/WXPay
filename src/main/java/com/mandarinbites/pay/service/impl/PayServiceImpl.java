@@ -6,12 +6,10 @@ import com.mandarinbites.pay.config.WXPayProperties;
 import com.mandarinbites.pay.dao.PayDAO;
 import com.mandarinbites.pay.domain.AccessToken;
 import com.mandarinbites.pay.domain.PayInfo;
-import com.mandarinbites.pay.enums.PayExceptionEnums;
 import com.mandarinbites.pay.enums.PayStatusEnums;
 import com.mandarinbites.pay.exception.PayException;
 import com.mandarinbites.pay.service.PayService;
 import com.mandarinbites.pay.utils.AccessTokenUtil;
-import com.mandarinbites.pay.utils.MD5Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.mandarinbites.pay.enums.PayExceptionEnums.*;
+import static com.mandarinbites.pay.enums.PayExceptionEnums.GET_ACCESS_TOKEN_FAIL;
+import static com.mandarinbites.pay.enums.PayExceptionEnums.PAY_RESULT_FAIL;
 
 /**
  * @param: none
@@ -79,25 +78,23 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public PayInfo prePayUnifiedOrder(String openId) throws Exception {
+    public PayInfo prePayUnifiedOrder(String openId) {
         UUID uuid = UUID.randomUUID();
-        StringBuilder sb = new StringBuilder();
-        sb.append(uuid.toString().replace("-", "").replace("=", ""));
-        String tradeId = MD5Util.getMD5Str(sb.toString());
+        String tradeId = uuid.toString().replace("-", "");
         int payStatus = PayStatusEnums.NOT_PAID.getStatus();
 
-        int id = payDAO.prePayUnifiedOrder(tradeId, openId, payStatus);
-        if (id <= 0) {
-            throw new PayException(PayExceptionEnums.PRE_PAY_FAIL.getCode(), PayExceptionEnums.PRE_PAY_FAIL.getMsg());
-        }
+        payDAO.prePayUnifiedOrder(tradeId, openId, payStatus);
 
-        PayInfo prepayInfo = payDAO.queryPrePayInfo(id);
-        int status = prepayInfo.getStatus();
-        if (status != PayStatusEnums.NOT_PAID.getStatus()) {
-            throw new PayException(PRE_PAY_STATUS_ERROR.getCode(), PRE_PAY_STATUS_ERROR.getMsg());
-        }
+        PayInfo payInfo = new PayInfo();
+        payInfo.setTradeId(tradeId);
+        payInfo.setOpenId(openId);
+        payInfo.setStatus(payStatus);
 
-        return prepayInfo;
+        // if (status != PayStatusEnums.NOT_PAID.getStatus()) {
+        //     throw new PayException(PRE_PAY_STATUS_ERROR.getCode(), PRE_PAY_STATUS_ERROR.getMsg());
+        // }
+
+        return payInfo;
     }
 
     @Override
@@ -109,11 +106,7 @@ public class PayServiceImpl implements PayService {
         Map<String, String> responseMap = wxPayClient.payByJSAPI(WXPayConstants.SignType.MD5, false, appId, mchId,
                 apiKey, tradeId, clientIP, openId, fee);
 
-        for (Map.Entry<String, String> entry : responseMap.entrySet()) {
-            System.out.println("key: " + entry.getKey() + " value: " + entry.getValue());
-        }
-
-        payDAO.updatePrePayID(responseMap.get("prepay_id"), openId);
+        payDAO.updatePrePayID(responseMap.get("prepay_id"), openId, tradeId);
 
         return responseMap;
     }

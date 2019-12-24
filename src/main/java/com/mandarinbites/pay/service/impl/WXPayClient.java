@@ -29,11 +29,9 @@ public class WXPayClient {
     private WXPayProperties properties;
 
     public Map<String, String> payByJSAPI(WXPayConstants.SignType signType, boolean sandBox, String appId, String mchId,
-                                          String mchKey, String tradeId, String clientIP, String openId, String fee) throws Exception {
-        WXPayConfiguration configuration = new WXPayConfiguration(appId, mchId, mchKey);
+                                          String apiKey, String tradeId, String clientIP, String openId, String fee) throws Exception {
+        WXPayConfiguration configuration = new WXPayConfiguration(appId, mchId, apiKey);
         WXPay wxPay = new WXPay(configuration, signType, sandBox);
-
-        System.out.println("total fee: " + fee);
 
         Map<String, String> data = new HashMap<>();
         data.put("body", "一口汉语在线课程");
@@ -52,16 +50,11 @@ public class WXPayClient {
         // if ("FAIL".equals(response.get("return_code"))) {
         //     throw new PayException(PRE_PAY_FAIL.getCode(), PRE_PAY_FAIL.getMsg());
         // }
-        System.out.println("response map: ");
-        for (Map.Entry<String, String> entry : response.entrySet()) {
-            System.out.println("key: " + entry.getKey() + " value: " + entry.getValue());
-        }
 
         String prePayId = response.get("prepay_id");
         if (prePayId == null || "".equals(prePayId)) {
             throw new PayException(PAY_FAIL.getCode(), PAY_FAIL.getMsg());
         }
-        System.out.println("prepay id: " + prePayId);
 
         return response;
     }

@@ -24,10 +24,10 @@ public interface PayDAO {
     PayInfo queryByTradeID(@Param("trade_id") String tradeId);
 
     @Insert({"INSERT INTO pay_info(trade_id, open_id, pay_status) VALUES(#{trade_id}, #{open_id}, #{pay_status})"})
-    int prePayUnifiedOrder(@Param("trade_id") String tradeId, @Param("open_id") String openId, @Param("pay_status") int status);
+    void prePayUnifiedOrder(@Param("trade_id") String tradeId, @Param("open_id") String openId, @Param("pay_status") int status);
 
-    @Update("UPDATE pay_info SET prepay_id = #{prepay_id} WHERE open_id = #{open_id}")
-    void updatePrePayID(@Param("prepay_id") String prePayId, @Param("open_id") String openId);
+    @Update("UPDATE pay_info SET prepay_id = #{prepay_id} WHERE open_id = #{open_id} AND trade_id = #{trade_id}")
+    void updatePrePayID(@Param("prepay_id") String prePayId, @Param("open_id") String openId, @Param("trade_id") String tradeId);
 
     @Update("UPDATE pay_info SET phone_number = #{phone_number}, email = #{email}, referees = #{referees}, pay_status = #{pay_status} " +
             "WHERE trade_id = #{trade_id}")
