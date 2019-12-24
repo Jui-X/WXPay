@@ -11,6 +11,8 @@ import lombok.Data;
 @Data
 public class PayInfo {
 
+    private int id;
+
     /** 商户订单ID */
     private String tradeId;
 

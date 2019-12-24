@@ -1,8 +1,6 @@
 package com.mandarinbites.pay.config;
 
 import com.github.wxpay.sdk.WXPayConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 
 import java.io.InputStream;
 
@@ -12,25 +10,31 @@ import java.io.InputStream;
  * @author: KingJ
  * @create: 2019-12-15 22:17
  **/
-@Configuration
 public class WXPayConfiguration implements WXPayConfig {
 
-    @Autowired
-    private WXPayProperties properties;
+    private String appId;
+    private String mchId;
+    private String mchKey;
+
+    public WXPayConfiguration(String appId, String mchId, String mchKey) {
+        this.appId = appId;
+        this.mchId = mchId;
+        this.mchKey = mchKey;
+    }
 
     @Override
     public String getAppID() {
-        return properties.getAppId();
+        return this.appId;
     }
 
     @Override
     public String getMchID() {
-        return properties.getMchId();
+        return this.mchId;
     }
 
     @Override
     public String getKey() {
-        return properties.getMchKey();
+        return this.mchKey;
     }
 
     @Override

@@ -82,9 +82,10 @@ public class PayServiceImpl implements PayService {
     public PayInfo prePayUnifiedOrder(String openId) throws Exception {
         UUID uuid = UUID.randomUUID();
         StringBuilder sb = new StringBuilder();
-        sb.append(uuid.toString().replace("-", ""));
+        sb.append(uuid.toString().replace("-", "").replace("=", ""));
         String tradeId = MD5Util.getMD5Str(sb.toString());
         int payStatus = PayStatusEnums.NOT_PAID.getStatus();
+
         int id = payDAO.prePayUnifiedOrder(tradeId, openId, payStatus);
         if (id <= 0) {
             throw new PayException(PayExceptionEnums.PRE_PAY_FAIL.getCode(), PayExceptionEnums.PRE_PAY_FAIL.getMsg());
@@ -96,14 +97,21 @@ public class PayServiceImpl implements PayService {
             throw new PayException(PRE_PAY_STATUS_ERROR.getCode(), PRE_PAY_STATUS_ERROR.getMsg());
         }
 
-        System.out.println("prePayInfo: " + prepayInfo.toString());
         return prepayInfo;
     }
 
     @Override
     public Map<String, String> wxPayByJSAPI(String tradeId, String clientIP, String openId, String fee) throws Exception {
+        String appId = properties.getAppId();
+        String mchId = properties.getMchId();
+        String apiKey = properties.getApiKey();
 
-        Map<String, String> responseMap = wxPayClient.payByJSAPI(WXPayConstants.SignType.MD5, true, tradeId, clientIP, openId, fee);
+        Map<String, String> responseMap = wxPayClient.payByJSAPI(WXPayConstants.SignType.MD5, false, appId, mchId,
+                apiKey, tradeId, clientIP, openId, fee);
+
+        for (Map.Entry<String, String> entry : responseMap.entrySet()) {
+            System.out.println("key: " + entry.getKey() + " value: " + entry.getValue());
+        }
 
         payDAO.updatePrePayID(responseMap.get("prepay_id"), openId);
 
@@ -113,8 +121,11 @@ public class PayServiceImpl implements PayService {
     @Override
     public Map<String, String> checkPayStatus(String phoneNumber, String email, String referees, String prePayId) throws Exception {
         String tradeId = payDAO.queryByPrePayId(prePayId);
+        String appId = properties.getAppId();
+        String mchId = properties.getMchId();
+        String apiKey = properties.getApiKey();
 
-        Map<String, String> queryResponse = wxPayClient.orderQuery(WXPayConstants.SignType.MD5, true, tradeId);
+        Map<String, String> queryResponse = wxPayClient.orderQuery(WXPayConstants.SignType.MD5, true, appId, mchId, apiKey, tradeId);
 
         if (SUCCESS.equals(queryResponse.get("return_code")) && SUCCESS.equals(queryResponse.get("result_code")) && SUCCESS.equals(queryResponse.get("trade_state"))) {
             payDAO.updatePayInfo(phoneNumber, email, referees, PayStatusEnums.SUCCESS.getStatus(), tradeId);

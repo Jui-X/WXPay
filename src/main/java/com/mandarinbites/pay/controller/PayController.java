@@ -40,7 +40,6 @@ public class PayController {
 
     @RequestMapping("/test")
     public JsonResult test() {
-        AccessToken accessToken = payService.getAccessTokenByCode("");
 
         return JsonResult.ok();
     }
@@ -61,7 +60,6 @@ public class PayController {
     @ResponseBody
     public JsonResult payByJSAPI(@RequestBody(required = true) JSONObject prePayParam, HttpServletRequest request) {
         try {
-            System.out.println(prePayParam);
             String clientIP = request.getRemoteAddr();
             String openId = prePayParam.getString("openId");
             String fee = prePayParam.getString("fee");

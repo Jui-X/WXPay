@@ -28,33 +28,47 @@ public class WXPayClient {
     @Autowired
     private WXPayProperties properties;
 
-    public Map<String, String> payByJSAPI(WXPayConstants.SignType signType, boolean sandBox, String tradeId, String clientIP, String openId, String fee) throws Exception, PayException {
-        WXPayConfiguration configuration = new WXPayConfiguration();
+    public Map<String, String> payByJSAPI(WXPayConstants.SignType signType, boolean sandBox, String appId, String mchId,
+                                          String mchKey, String tradeId, String clientIP, String openId, String fee) throws Exception {
+        WXPayConfiguration configuration = new WXPayConfiguration(appId, mchId, mchKey);
         WXPay wxPay = new WXPay(configuration, signType, sandBox);
+
+        System.out.println("total fee: " + fee);
 
         Map<String, String> data = new HashMap<>();
         data.put("body", "一口汉语在线课程");
         data.put("out_trade_no", tradeId);
-        data.put("total_fee", String.valueOf(fee));
+        data.put("total_fee", fee);
         data.put("spbill_create_ip", clientIP);
         data.put("notify_url", properties.getNotifyUrl());
         data.put("trade_type", properties.getTradeType());
         data.put("openid", openId);
-
-        data = wxPay.fillRequestData(data);
+        data.put("sign_type", "MD5");
+        data.put("device_info", "");
+        data.put("fee_type", "CNY");
 
         Map<String, String> response = wxPay.unifiedOrder(data);
+
+        // if ("FAIL".equals(response.get("return_code"))) {
+        //     throw new PayException(PRE_PAY_FAIL.getCode(), PRE_PAY_FAIL.getMsg());
+        // }
+        System.out.println("response map: ");
+        for (Map.Entry<String, String> entry : response.entrySet()) {
+            System.out.println("key: " + entry.getKey() + " value: " + entry.getValue());
+        }
 
         String prePayId = response.get("prepay_id");
         if (prePayId == null || "".equals(prePayId)) {
             throw new PayException(PAY_FAIL.getCode(), PAY_FAIL.getMsg());
         }
+        System.out.println("prepay id: " + prePayId);
 
         return response;
     }
 
-    public Map<String, String> orderQuery(WXPayConstants.SignType signType, boolean sandBox, String tradeId) throws Exception {
-        WXPayConfiguration configuration = new WXPayConfiguration();
+    public Map<String, String> orderQuery(WXPayConstants.SignType signType, boolean sandBox, String appId, String mchId,
+                                          String mchKey, String tradeId) throws Exception {
+        WXPayConfiguration configuration = new WXPayConfiguration(appId, mchId, mchKey);
         WXPay wxPay = new WXPay(configuration, signType, sandBox);
 
         Map<String, String> data = new HashMap<>();
